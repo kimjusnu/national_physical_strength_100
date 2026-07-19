@@ -1,22 +1,25 @@
+import { Dumbbell, ExternalLink, Flame, HeartPulse, Timer, Zap } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { KspoVideoRecord } from "@/data/mockVideos";
 import type { FitnessItemKey } from "@/lib/types";
 import { ITEM_LABELS } from "@/data/normTables";
 import { ITEM_TO_FT_CATEGORY, reasonFor } from "@/lib/videoMatch";
+import { SectionCard } from "@/components/ui/Card";
 
 interface PrescriptionVideosProps {
   videos: KspoVideoRecord[];
   weakItems: FitnessItemKey[];
 }
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  근력: "💪",
-  근지구력: "🧘",
-  순발력: "⚡",
-  유산소: "🔥",
-  심폐지구력: "🏃",
+/** 체력요인 카테고리 → 아이콘 (§7: 이모지 금지, lucide 스트로크 아이콘) */
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  근력: Dumbbell,
+  근지구력: Timer,
+  순발력: Zap,
+  유산소: Flame,
+  심폐지구력: HeartPulse,
 };
 
-/** 약점 항목 기반 맞춤 운동처방 영상 카드 리스트 */
 export default function PrescriptionVideos({
   videos,
   weakItems,
@@ -28,37 +31,46 @@ export default function PrescriptionVideos({
   );
 
   return (
-    <section className="rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5">
-      <h2 className="mb-1 text-lg font-bold">맞춤 운동처방 영상</h2>
-      <p className="mb-4 text-xs text-neutral-500">
-        {weakItems.map((k) => ITEM_LABELS[k]).join(", ")} 보완에 좋은 국민체력100
-        운동 영상이에요.
-      </p>
-      <ul className="space-y-3">
-        {videos.map((video) => {
+    <SectionCard
+      title="맞춤 운동 처방"
+      description={`${weakItems.map((k) => ITEM_LABELS[k]).join(", ")} 보완에 좋은 국민체력100 운동 영상입니다.`}
+      source="출처: 국민체력100 동영상 정보 (data.go.kr)"
+    >
+      <ul className="space-y-2.5">
+        {videos.map((video, i) => {
           const weakKey = categoryToWeakItem.get(video.FT_ITEM_NM);
+          const Icon = CATEGORY_ICON[video.FT_ITEM_NM] ?? Dumbbell;
           return (
             <li key={video.VDO_TTL_NM}>
               <a
                 href={video.VDO_LINK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex gap-3 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-3 hover:border-emerald-400 transition-colors"
+                className="animate-arrive flex gap-3 rounded-sharp border border-hairline p-3 transition-colors hover:border-brand hover:bg-mint"
+                style={{ animationDelay: `${i * 60}ms` }}
               >
                 <span
-                  className="flex h-16 w-24 flex-none items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 text-3xl"
+                  className="flex h-16 w-24 flex-none items-center justify-center rounded-sharp bg-surface-neutral text-chart-1"
                   aria-hidden
                 >
-                  {CATEGORY_EMOJI[video.FT_ITEM_NM] ?? "🎬"}
+                  <Icon size={26} strokeWidth={1.75} />
                 </span>
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-sm">
+
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-1 truncate text-[0.9375rem] font-bold text-heading">
                     {video.VDO_TTL_NM}
+                    <ExternalLink
+                      size={13}
+                      strokeWidth={2}
+                      className="flex-none text-placeholder"
+                      aria-hidden
+                    />
                   </p>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-neutral-500">
+                  <p className="mt-0.5 line-clamp-1 text-[0.8125rem] text-caption">
                     {video.VDO_DESC}
                   </p>
-                  <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                  {/* §12-1: 모든 추천에는 한 문장 근거가 붙는다 */}
+                  <p className="mt-1 text-[0.8125rem] font-medium text-brand">
                     {weakKey
                       ? reasonFor(weakKey)
                       : `${video.FT_ITEM_NM} 향상 · ${video.TRGT_AGRDE_NM}`}
@@ -69,9 +81,6 @@ export default function PrescriptionVideos({
           );
         })}
       </ul>
-      <p className="mt-3 text-right text-[11px] text-neutral-400">
-        출처: 국민체력100 동영상 정보 (data.go.kr)
-      </p>
-    </section>
+    </SectionCard>
   );
 }

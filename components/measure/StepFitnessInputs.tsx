@@ -3,6 +3,7 @@
 import { useState } from "react";
 import NumberField from "@/components/measure/NumberField";
 import MeasureGuideModal from "@/components/measure/MeasureGuideModal";
+import { Button } from "@/components/ui/Button";
 import { fitnessInputsSchema } from "@/lib/schemas";
 import { ITEM_LABELS, ITEM_UNITS } from "@/data/normTables";
 import type { FitnessInputs, FitnessItemKey } from "@/lib/types";
@@ -18,6 +19,7 @@ const FIELD_ORDER: Array<{
   placeholder: string;
   optional?: boolean;
 }> = [
+  // 플레이스홀더는 "예:"를 붙인다 — 우측 정렬 숫자만 두면 입력된 값으로 오인된다
   { key: "grip", placeholder: "예: 38.5" },
   { key: "situp", placeholder: "예: 30" },
   { key: "jump", placeholder: "예: 190" },
@@ -61,26 +63,23 @@ export default function StepFitnessInputs({
           placeholder={placeholder}
           error={errors[key]}
           optional={optional}
+          measure
           onChange={(v) => setValues((prev) => ({ ...prev, [key]: v }))}
           onGuide={() => setGuideItem(key)}
         />
       ))}
 
-      <div className="flex gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex-1 rounded-xl border border-neutral-300 dark:border-neutral-700 py-4 font-semibold hover:border-emerald-400 transition-colors"
-        >
+      <div className="flex gap-2 pt-1">
+        <Button variant="neutral" onClick={onBack} className="flex-1">
           이전
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="primaryLarge"
           onClick={handleSubmit}
-          className="flex-[2] rounded-xl bg-emerald-600 py-4 text-lg font-bold text-white hover:bg-emerald-700 transition-colors"
+          className="flex-[2]"
         >
-          내 체력나이 확인하기
-        </button>
+          결과 보기
+        </Button>
       </div>
 
       <MeasureGuideModal itemKey={guideItem} onClose={() => setGuideItem(null)} />

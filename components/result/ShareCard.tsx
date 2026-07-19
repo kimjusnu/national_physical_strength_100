@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { Download, Link2, Share2 } from "lucide-react";
 import { buildCardModel, generateResultCard } from "@/lib/share";
 import type { FitnessAgeResult } from "@/lib/types";
+import { Button } from "@/components/ui/Button";
+import { SectionCard } from "@/components/ui/Card";
 
 interface ShareCardProps {
   result: FitnessAgeResult;
@@ -11,7 +14,7 @@ interface ShareCardProps {
 
 type Status = { kind: "idle" } | { kind: "busy" } | { kind: "done"; message: string };
 
-/** 결과 카드 이미지 저장 · 링크 복사 · Web Share (SNS 바이럴) */
+/** 결과 카드 이미지 저장 · 링크 복사 · Web Share (§14 Success: 인라인 확인, 토스트 금지) */
 export default function ShareCard({ result, realAge }: ShareCardProps) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
@@ -35,7 +38,7 @@ export default function ShareCard({ result, realAge }: ShareCardProps) {
       notify("이미지를 저장했어요");
     } catch (error) {
       console.error("결과 카드 생성 실패:", error);
-      notify("이미지 저장에 실패했어요");
+      notify("이미지를 만들지 못했어요. 다시 시도해주세요.");
     }
   };
 
@@ -45,7 +48,7 @@ export default function ShareCard({ result, realAge }: ShareCardProps) {
       notify("결과 링크를 복사했어요");
     } catch (error) {
       console.error("링크 복사 실패:", error);
-      notify("링크 복사에 실패했어요");
+      notify("링크를 복사하지 못했어요");
     }
   };
 
@@ -56,7 +59,7 @@ export default function ShareCard({ result, realAge }: ShareCardProps) {
       const file = new File([blob], "체력나이.png", { type: "image/png" });
       const payload = {
         title: "나의 체력나이",
-        text: `제 체력나이는 ${Math.round(result.overallAge)}세예요! 당신도 측정해보세요.`,
+        text: `제 체력나이는 ${Math.round(result.overallAge)}세입니다.`,
         url: window.location.href,
       };
 
@@ -68,12 +71,12 @@ export default function ShareCard({ result, realAge }: ShareCardProps) {
       setStatus({ kind: "idle" });
     } catch (error) {
       // 사용자가 공유 시트를 닫은 경우는 오류가 아니다
-      if ((error as Error)?.name !== "AbortError") {
-        console.error("공유 실패:", error);
-        notify("공유에 실패했어요");
-      } else {
+      if ((error as Error)?.name === "AbortError") {
         setStatus({ kind: "idle" });
+        return;
       }
+      console.error("공유 실패:", error);
+      notify("공유하지 못했어요");
     }
   };
 
@@ -81,47 +84,47 @@ export default function ShareCard({ result, realAge }: ShareCardProps) {
     typeof navigator !== "undefined" && typeof navigator.share === "function";
 
   return (
-    <section className="rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5">
-      <h2 className="mb-1 text-lg font-bold">결과 공유하기</h2>
-      <p className="mb-4 text-xs text-neutral-500">
-        결과 카드 이미지를 저장하거나 링크로 친구에게 자랑해보세요.
-      </p>
-
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <button
-          type="button"
+    <SectionCard
+      title="결과 공유"
+      description="결과 카드 이미지를 저장하거나 링크로 공유할 수 있습니다."
+    >
+      <div className="flex flex-col gap-2">
+        <Button
+          variant="primary"
           onClick={handleSaveImage}
           disabled={status.kind === "busy"}
-          className="flex-1 rounded-xl bg-emerald-600 py-3.5 font-bold text-white hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+          className="w-full"
         >
-          {status.kind === "busy" ? "만드는 중…" : "🖼 이미지 저장"}
-        </button>
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          className="flex-1 rounded-xl border border-emerald-600 py-3.5 font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
-        >
-          🔗 링크 복사
-        </button>
-        {canWebShare && (
-          <button
-            type="button"
-            onClick={handleShare}
-            disabled={status.kind === "busy"}
-            className="flex-1 rounded-xl border border-neutral-300 dark:border-neutral-700 py-3.5 font-bold hover:border-emerald-400 disabled:opacity-60 transition-colors"
-          >
-            📤 공유
-          </button>
-        )}
+          <Download size={17} strokeWidth={2.25} aria-hidden />
+          {status.kind === "busy" ? "만드는 중" : "이미지 저장"}
+        </Button>
+
+        <div className="flex gap-2">
+          <Button variant="ghost" onClick={handleCopyLink} className="flex-1">
+            <Link2 size={17} strokeWidth={2.25} aria-hidden />
+            링크 복사
+          </Button>
+          {canWebShare && (
+            <Button
+              variant="neutral"
+              onClick={handleShare}
+              disabled={status.kind === "busy"}
+              className="flex-1"
+            >
+              <Share2 size={17} strokeWidth={2.25} aria-hidden />
+              공유
+            </Button>
+          )}
+        </div>
       </div>
 
       <p
-        className="mt-2 min-h-5 text-center text-xs text-emerald-600 dark:text-emerald-400"
+        className="mt-2 min-h-5 text-center text-[0.8125rem] font-medium text-brand"
         role="status"
         aria-live="polite"
       >
         {status.kind === "done" ? status.message : ""}
       </p>
-    </section>
+    </SectionCard>
   );
 }

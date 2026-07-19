@@ -43,3 +43,13 @@ next-env.d.ts
 
 # 자동 생성 기준테이블 (scripts/buildNormTables.ts 결과)
 data/normTables.generated.ts
+
+# Playwright
+/test-results/
+/playwright-report/
+e2e/__shots__/
+
+# oh-my-design-cli 설치 파일 (npx oh-my-design-cli install-skills로 재생성)
+.claude/
+.agents/
+.codex/

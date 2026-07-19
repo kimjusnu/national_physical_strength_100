@@ -1,0 +1,28 @@
+{
+  "reference_id": "banksalad",
+  "description": "체력나이(Fitness Age) — KSPO 국민체력100 공공데이터 기반 체력 측정/건강 웹앱. 전 연령(청소년~시니어), 모바일 우선, 접근성 중요(큰 글씨 토글). Next.js App Router + TypeScript + Tailwind v4 + recharts. 공공기관 경진대회 출품작으로 신뢰감·완성도 중요, 결과 화면 임팩트가 핵심.",
+  "mode": "inspired",
+  "delta_set": {
+    "axes": {
+      "density.shift": -1
+    },
+    "voiceHints": [
+      "측정 결과를 설명하는 코치 톤",
+      "숫자 뒤에 반드시 이유를 붙인다",
+      "공공데이터 출처를 제품의 일부로 노출"
+    ],
+    "matchedKeywords": [
+      "factual",
+      "advisor",
+      "calm",
+      "data-driven",
+      "explanatory",
+      "precise",
+      "trustworthy"
+    ],
+    "warnings": [
+      "banksalad의 density-is-trust 원칙과 전 연령 접근성 요구가 부분 충돌 — 타이포·터치타깃은 확대하되 정보 밀도(비교 가능성)는 유지"
+    ]
+  },
+  "bootstrapped_at": "2026-07-19T04:27:35.534Z"
+}

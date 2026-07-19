@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NumberField from "@/components/measure/NumberField";
+import { Button } from "@/components/ui/Button";
 import { basicInfoSchema } from "@/lib/schemas";
 import type { BasicInfo, Gender } from "@/lib/types";
 import { toFieldErrors, withEmptyAsUndefined } from "@/lib/formUtils";
@@ -29,31 +30,37 @@ export default function StepBasicInfo({ onNext }: StepBasicInfoProps) {
     onNext(parsed.data);
   };
 
-  const genderButton = (value: Gender, label: string) => (
-    <button
-      type="button"
-      onClick={() => setGender(value)}
-      aria-pressed={gender === value}
-      className={`flex-1 rounded-xl border py-3 font-semibold transition-colors ${
-        gender === value
-          ? "border-emerald-600 bg-emerald-600 text-white"
-          : "border-neutral-300 dark:border-neutral-700 hover:border-emerald-400"
-      }`}
-    >
-      {label}
-    </button>
-  );
+  /** §4 Segmented Choice — 2지선다는 드롭다운보다 탭 한 번이 낫다 */
+  const genderButton = (value: Gender, label: string) => {
+    const selected = gender === value;
+    return (
+      <button
+        type="button"
+        onClick={() => setGender(value)}
+        aria-pressed={selected}
+        className={`h-14 flex-1 rounded-sharp text-[1.0625rem] font-bold transition-colors ${
+          selected
+            ? "bg-brand text-white"
+            : "border border-hairline bg-white text-body hover:border-brand"
+        }`}
+      >
+        {label}
+      </button>
+    );
+  };
 
   return (
     <div className="space-y-5">
       <div>
-        <span className="mb-1 block text-sm font-medium">성별</span>
-        <div className="flex gap-3">
+        <span className="mb-1.5 block text-[0.9375rem] font-bold text-heading">
+          성별
+        </span>
+        <div className="flex gap-2">
           {genderButton("M", "남성")}
           {genderButton("F", "여성")}
         </div>
         {errors.gender && (
-          <p className="mt-1 text-xs text-red-500" role="alert">
+          <p className="mt-1.5 text-[0.8125rem] font-medium text-danger" role="alert">
             {errors.gender}
           </p>
         )}
@@ -87,13 +94,9 @@ export default function StepBasicInfo({ onNext }: StepBasicInfoProps) {
         onChange={setWeightKg}
       />
 
-      <button
-        type="button"
-        onClick={handleNext}
-        className="w-full rounded-xl bg-emerald-600 py-4 text-lg font-bold text-white hover:bg-emerald-700 transition-colors"
-      >
+      <Button variant="primaryLarge" onClick={handleNext} className="w-full">
         다음
-      </button>
+      </Button>
     </div>
   );
 }

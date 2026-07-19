@@ -1,11 +1,13 @@
 "use client";
 
+import { Type } from "lucide-react";
+
 const STORAGE_KEY = "fitness-age-big-text";
 
 /**
- * 큰 글씨 모드 토글 — html의 .big-text 클래스로 전체 글자 크기를 키운다.
+ * 큰 글씨 모드 토글 — DESIGN.md §14 Big Text Mode.
  * 저장된 설정은 layout의 인라인 스크립트가 첫 페인트 전에 적용하고,
- * 켜짐/꺼짐 라벨은 CSS(html.big-text 선택자)로 전환해 React 상태가 필요 없다.
+ * 라벨 전환은 CSS(html.big-text)로 처리해 React 상태가 필요 없다.
  */
 export default function BigTextToggle() {
   const toggle = () => {
@@ -22,10 +24,11 @@ export default function BigTextToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="rounded-full border border-emerald-200 dark:border-emerald-800 px-3 py-1 text-sm text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
+      className="inline-flex items-center gap-1.5 rounded-sharp border border-hairline px-3 py-2 text-[0.8125rem] font-bold text-body transition-colors hover:border-brand hover:text-brand"
     >
-      <span className="big-text-label-off">가 큰 글씨</span>
-      <span className="big-text-label-on">가 큰 글씨 끄기</span>
+      <Type size={15} strokeWidth={2.25} aria-hidden />
+      <span className="big-text-label-off">큰 글씨</span>
+      <span className="big-text-label-on">큰 글씨 끄기</span>
     </button>
   );
 }

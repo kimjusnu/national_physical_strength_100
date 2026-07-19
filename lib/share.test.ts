@@ -19,7 +19,8 @@ describe("buildCardModel", () => {
     const model = buildCardModel(baseResult, 35);
     expect(model.fitnessAge).toBe(32);
     expect(model.realAge).toBe(35);
-    expect(model.gapText).toBe("실제 나이보다 3세 젊어요!");
+    // DESIGN.md §10: 일상 문구에 느낌표를 쓰지 않는다
+    expect(model.gapText).toBe("실제 나이보다 3세 젊어요");
   });
 
   it("체력나이가 더 많으면 '많아요' 문구", () => {
@@ -34,7 +35,8 @@ describe("buildCardModel", () => {
 
   it("boundary가 elite면 뱃지 텍스트 포함", () => {
     const model = buildCardModel({ ...baseResult, boundary: "elite" }, 35);
-    expect(model.badgeText).toBe("🏆 상위 1% 체력");
+    // DESIGN.md §7: UI에 이모지를 쓰지 않는다 (아이콘 라이브러리로 대체)
+    expect(model.badgeText).toBe("상위 1% 체력");
   });
 
   it("boundary가 없으면 뱃지는 null", () => {

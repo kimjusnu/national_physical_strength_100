@@ -4,6 +4,7 @@ import type { FitnessAgeResult } from "@/lib/types";
 /**
  * 결과 카드 공유 이미지 — 순수 모델(buildCardModel, 테스트 대상)과
  * 브라우저 canvas 렌더러(generateResultCard)를 분리했다.
+ * 시각 스펙은 DESIGN.md §2 색상 · §5 radius 2px · §7 그래디언트 금지를 따른다.
  */
 
 export interface ShareCardModel {
@@ -16,7 +17,7 @@ export interface ShareCardModel {
 }
 
 const BADGE_TEXTS = {
-  elite: "🏆 상위 1% 체력",
+  elite: "상위 1% 체력",
   needsImprovement: "체력 개선 필요",
 } as const;
 
@@ -29,7 +30,7 @@ export function buildCardModel(
   const gap = realAge - fitnessAge;
   const gapText =
     gap > 0
-      ? `실제 나이보다 ${gap}세 젊어요!`
+      ? `실제 나이보다 ${gap}세 젊어요`
       : gap < 0
         ? `실제 나이보다 ${-gap}세 많아요`
         : "실제 나이와 같아요";
@@ -51,6 +52,25 @@ export function buildCardModel(
 
 const CARD_W = 1080;
 const CARD_H = 1350;
+const PAD = 80;
+const RADIUS = 2;
+
+const C = {
+  canvas: "#ffffff",
+  mint: "#f3fdfa",
+  brand: "#04c584",
+  heading: "#2b2b2b",
+  body: "#434444",
+  caption: "#7b7b7b",
+  hairline: "#e1e1e1",
+  neutral: "#f5f5f5",
+  warn: "#fd8700",
+  chart2: "#5c818a",
+} as const;
+
+const FONT = `Pretendard Variable, Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`;
+
+const font = (weight: number, size: number) => `${weight} ${size}px ${FONT}`;
 
 /** 세로형 결과 카드 이미지를 PNG Blob으로 생성 (브라우저 전용) */
 export async function generateResultCard(model: ShareCardModel): Promise<Blob> {
@@ -62,10 +82,15 @@ export async function generateResultCard(model: ShareCardModel): Promise<Blob> {
     throw new Error("canvas 2d context를 사용할 수 없습니다.");
   }
 
-  drawBackground(ctx);
-  drawHeader(ctx, model);
-  drawItems(ctx, model);
-  drawWatermark(ctx, model);
+  // Pretendard가 로드된 뒤에 그려야 폴백 폰트로 렌더되지 않는다
+  await document.fonts?.ready;
+
+  ctx.fillStyle = C.canvas;
+  ctx.fillRect(0, 0, CARD_W, CARD_H);
+
+  const heroBottom = drawHero(ctx, model);
+  drawItems(ctx, model, heroBottom + 72);
+  drawFooter(ctx, model);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -75,104 +100,166 @@ export async function generateResultCard(model: ShareCardModel): Promise<Blob> {
   });
 }
 
-function drawBackground(ctx: CanvasRenderingContext2D) {
-  const gradient = ctx.createLinearGradient(0, 0, 0, CARD_H);
-  gradient.addColorStop(0, "#ecfdf5");
-  gradient.addColorStop(0.45, "#ffffff");
-  gradient.addColorStop(1, "#ffffff");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, CARD_W, CARD_H);
-
-  ctx.strokeStyle = "#a7f3d0";
-  ctx.lineWidth = 8;
-  ctx.strokeRect(24, 24, CARD_W - 48, CARD_H - 48);
-}
-
-function drawHeader(ctx: CanvasRenderingContext2D, model: ShareCardModel) {
+/** 민트 틴트 히어로 블록. 반환값은 블록 하단 y좌표 */
+function drawHero(ctx: CanvasRenderingContext2D, model: ShareCardModel): number {
+  const top = PAD;
+  const height = model.badgeText ? 560 : 480;
   const centerX = CARD_W / 2;
+
+  ctx.fillStyle = C.mint;
+  roundedRect(ctx, PAD, top, CARD_W - PAD * 2, height, RADIUS);
+  ctx.fill();
+  ctx.strokeStyle = C.hairline;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
   ctx.textAlign = "center";
 
-  ctx.fillStyle = "#374151";
-  ctx.font = "600 44px sans-serif";
-  ctx.fillText("나의 체력나이는", centerX, 170);
+  ctx.fillStyle = C.body;
+  ctx.font = font(500, 34);
+  ctx.fillText("국민체력100 데이터와 비교한 나의 체력나이", centerX, top + 76);
 
-  ctx.fillStyle = "#059669";
-  ctx.font = "900 300px sans-serif";
-  ctx.fillText(String(model.fitnessAge), centerX, 470);
-  ctx.font = "700 80px sans-serif";
-  ctx.fillText("세", centerX + measureHalf(ctx, model), 470);
+  // 숫자와 "세"를 하나의 베이스라인에 정렬
+  const ageText = String(model.fitnessAge);
+  ctx.font = font(800, 240);
+  const ageWidth = ctx.measureText(ageText).width;
+  ctx.font = font(700, 64);
+  const suffixWidth = ctx.measureText("세").width;
+  const totalWidth = ageWidth + 12 + suffixWidth;
+  const startX = centerX - totalWidth / 2;
+  const baseline = top + 290;
 
-  ctx.fillStyle = "#111827";
-  ctx.font = "700 52px sans-serif";
-  ctx.fillText(model.gapText, centerX, 580);
+  ctx.textAlign = "left";
+  ctx.fillStyle = C.brand;
+  ctx.font = font(800, 240);
+  ctx.fillText(ageText, startX, baseline);
+  ctx.font = font(700, 64);
+  ctx.fillText("세", startX + ageWidth + 12, baseline);
 
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "400 36px sans-serif";
-  ctx.fillText(`실제 나이 ${model.realAge}세 기준`, centerX, 640);
+  ctx.textAlign = "center";
+  ctx.fillStyle = C.heading;
+  ctx.font = font(700, 46);
+  ctx.fillText(model.gapText, centerX, baseline + 78);
+
+  ctx.fillStyle = C.caption;
+  ctx.font = font(500, 28);
+  ctx.fillText(`실제 나이 ${model.realAge}세 기준`, centerX, baseline + 124);
 
   if (model.badgeText) {
-    drawBadge(ctx, model.badgeText, centerX, 700);
+    drawBadge(ctx, model, centerX, baseline + 200);
   }
-}
 
-/** "세" 글자를 숫자 오른쪽에 붙이기 위한 오프셋 계산 */
-function measureHalf(ctx: CanvasRenderingContext2D, model: ShareCardModel): number {
-  ctx.font = "900 300px sans-serif";
-  return ctx.measureText(String(model.fitnessAge)).width / 2 + 60;
+  return top + height;
 }
 
 function drawBadge(
   ctx: CanvasRenderingContext2D,
-  text: string,
+  model: ShareCardModel,
   centerX: number,
   y: number,
 ) {
-  ctx.font = "700 40px sans-serif";
-  const width = ctx.measureText(text).width + 80;
-  ctx.fillStyle = "#fef3c7";
-  drawRoundedRect(ctx, centerX - width / 2, y - 44, width, 72, 36);
+  const isElite = model.badgeText === BADGE_TEXTS.elite;
+  const color = isElite ? C.brand : C.warn;
+
+  ctx.font = font(700, 32);
+  const width = ctx.measureText(model.badgeText ?? "").width + 64;
+  const height = 62;
+
+  ctx.fillStyle = C.canvas;
+  roundedRect(ctx, centerX - width / 2, y - height / 2, width, height, RADIUS);
   ctx.fill();
-  ctx.fillStyle = "#b45309";
-  ctx.fillText(text, centerX, y + 8);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(model.badgeText ?? "", centerX, y + 1);
+  ctx.textBaseline = "alphabetic";
 }
 
-function drawItems(ctx: CanvasRenderingContext2D, model: ShareCardModel) {
-  const startY = model.badgeText ? 810 : 760;
-  const barX = 400;
-  const barMaxW = 520;
-  const rowH = 78;
+/** 항목별 백분위 바. 반환값은 마지막 행 하단 y좌표 */
+function drawItems(
+  ctx: CanvasRenderingContext2D,
+  model: ShareCardModel,
+  top: number,
+): number {
+  const barX = PAD + 300;
+  const barW = CARD_W - PAD * 2 - 300 - 190;
+  const rowH = 74;
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = C.heading;
+  ctx.font = font(700, 34);
+  ctx.fillText("항목별 위치", PAD, top);
+
+  const listTop = top + 46;
 
   model.items.forEach((item, i) => {
-    const y = startY + i * rowH;
+    const y = listTop + i * rowH;
+
+    ctx.strokeStyle = C.hairline;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(PAD, y - 26);
+    ctx.lineTo(CARD_W - PAD, y - 26);
+    ctx.stroke();
 
     ctx.textAlign = "left";
-    ctx.fillStyle = "#374151";
-    ctx.font = "600 36px sans-serif";
-    ctx.fillText(item.label, 120, y + 12);
+    ctx.fillStyle = C.body;
+    ctx.font = font(500, 30);
+    ctx.fillText(item.label, PAD, y + 12);
 
-    ctx.fillStyle = "#e5e7eb";
-    drawRoundedRect(ctx, barX, y - 14, barMaxW, 30, 15);
+    ctx.fillStyle = C.neutral;
+    roundedRect(ctx, barX, y - 6, barW, 20, RADIUS);
     ctx.fill();
 
-    ctx.fillStyle = item.percentile >= 60 ? "#10b981" : item.percentile <= 40 ? "#fb923c" : "#9ca3af";
-    drawRoundedRect(ctx, barX, y - 14, Math.max(barMaxW * (item.percentile / 100), 24), 30, 15);
+    ctx.fillStyle =
+      item.percentile >= 60 ? C.brand : item.percentile <= 40 ? C.warn : C.chart2;
+    roundedRect(
+      ctx,
+      barX,
+      y - 6,
+      Math.max(barW * (item.percentile / 100), 8),
+      20,
+      RADIUS,
+    );
     ctx.fill();
 
     ctx.textAlign = "right";
-    ctx.fillStyle = "#6b7280";
-    ctx.font = "400 32px sans-serif";
-    ctx.fillText(`상위 ${100 - item.percentile}%`, CARD_W - 100, y + 10);
+    ctx.fillStyle = C.caption;
+    ctx.font = font(500, 26);
+    ctx.fillText(`상위 ${100 - item.percentile}%`, CARD_W - PAD, y + 12);
   });
+
+  const bottom = listTop + model.items.length * rowH;
+  ctx.strokeStyle = C.hairline;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(PAD, bottom - 26);
+  ctx.lineTo(CARD_W - PAD, bottom - 26);
+  ctx.stroke();
+
+  return bottom;
 }
 
-function drawWatermark(ctx: CanvasRenderingContext2D, model: ShareCardModel) {
+function drawFooter(ctx: CanvasRenderingContext2D, model: ShareCardModel) {
   ctx.textAlign = "center";
-  ctx.fillStyle = "#059669";
-  ctx.font = "700 40px sans-serif";
+  ctx.fillStyle = C.brand;
+  ctx.font = font(700, 34);
   ctx.fillText(model.watermark, CARD_W / 2, CARD_H - 100);
+
+  ctx.fillStyle = C.caption;
+  ctx.font = font(500, 24);
+  ctx.fillText(
+    "간이 측정 결과이며 정식 체력인증을 대체하지 않습니다",
+    CARD_W / 2,
+    CARD_H - 60,
+  );
 }
 
-function drawRoundedRect(
+function roundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,

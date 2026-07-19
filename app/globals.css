@@ -1,36 +1,82 @@
 @import "tailwindcss";
+/* Pretendard — DESIGN.md §3 Font Family.
+   dynamic-subset(92개 unicode-range 청크, font-display:swap)을 쓴다.
+   단일 가변 파일은 2,009KB를 항상 받지만 서브셋은 실제 사용 글자 청크만 받는다. */
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/**
+ * 체력나이 디자인 토큰 — DESIGN.md 기준.
+ * 값을 바꾸기 전에 DESIGN.md를 먼저 갱신할 것.
+ */
+@theme {
+  /* Color — §2 */
+  --color-brand: #04c584;
+  --color-brand-hover: #10df99;
+  --color-mint: #f3fdfa;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
+  --color-canvas: #ffffff;
+  --color-surface-alt: #fbfbfb;
+  --color-surface-neutral: #f5f5f5;
+  --color-hairline: #e1e1e1;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-heading: #2b2b2b;
+  --color-body: #434444;
+  --color-caption: #7b7b7b;
+  --color-placeholder: #999999;
+  --color-disabled: #acacac;
+
+  --color-danger: #fe493d;
+  --color-warn: #fd8700;
+  --color-warn-deep: #f56200;
+  --color-info: #0099ff;
+
+  /* Chart — §2 teal-slate. 브랜드 그린은 "내 값" 전용 */
+  --color-chart-1: #34464b;
+  --color-chart-2: #5c818a;
+  --color-chart-3: #1c6c73;
+  --color-chart-4: #a7c7cf;
+
+  /* Radius — §5. 2px가 시그니처 */
+  --radius-sharp: 2px;
+  --radius-sm: 4px;
+  --radius-soft: 8px;
+  --radius-chip: 41px;
+
+  /* Shadow — §6. 항상 중립 단일 레이어 */
+  --shadow-soft: 0 1px 1px rgba(0, 0, 0, 0.08);
+  --shadow-standard: 0 2px 5px rgba(0, 0, 0, 0.12);
+  --shadow-elevated: 0 4px 9px rgba(0, 0, 0, 0.15);
+  --shadow-modal: 0 17px 50px rgba(0, 0, 0, 0.19);
+
+  /* Motion — §15 */
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-data: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 }
 
 html {
-  background: var(--background);
-  color: var(--foreground);
-  font-family:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  /* 측정 수치가 자릿수 변화에도 흔들리지 않도록 — §12-7 */
+  font-variant-numeric: tabular-nums;
 }
 
-/* 접근성: 큰 글씨 모드 (전 연령 대상 서비스) */
+body {
+  font-size: 0.9375rem; /* body 15px — §3 */
+  font-weight: 500; /* §3: 본문 400 금지 */
+  line-height: 1.4;
+}
+
+/* 접근성: 큰 글씨 모드 — §14 Big Text Mode */
 html.big-text {
   font-size: 120%;
 }
 
-/* 큰 글씨 토글 버튼 라벨 전환 */
 .big-text-label-on {
   display: none;
 }
@@ -39,4 +85,67 @@ html.big-text .big-text-label-on {
 }
 html.big-text .big-text-label-off {
   display: none;
+}
+
+/* §15: 모션 축소 선호 시 모든 모션은 즉시 상태로 붕괴 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 백분위 바 채우기 — §15 시그니처 모션 2 */
+@keyframes fill-bar {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.animate-fill-bar {
+  transform-origin: left;
+  animation: fill-bar 600ms var(--ease-standard) both;
+}
+
+/* 추천 카드 등장 — §15 시그니처 모션 4. 이동거리 4px */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-arrive {
+  animation: arrive 250ms var(--ease-enter) both;
+}
+
+/* 스켈레톤 — §14 */
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-neutral) 25%,
+    #ffffff 50%,
+    var(--color-surface-neutral) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1s linear infinite;
 }

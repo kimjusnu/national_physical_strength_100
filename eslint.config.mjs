@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 도구가 설치한 파일 (oh-my-design-cli) — 우리 소스가 아니다
+    ".claude/**",
+    ".agents/**",
+    ".codex/**",
   ]),
 ]);
 
