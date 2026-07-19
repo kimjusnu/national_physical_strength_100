@@ -3,6 +3,7 @@ import type { KspoVideoRecord } from "@/data/mockVideos";
 import type { FitnessItemKey } from "@/lib/types";
 import { ITEM_LABELS } from "@/data/normTables";
 import { ITEM_TO_FT_CATEGORY, reasonFor } from "@/lib/videoMatch";
+import { shortenVideoTitle } from "@/lib/videoTitle";
 import { SectionCard } from "@/components/ui/Card";
 import VideoThumbnail from "@/components/result/VideoThumbnail";
 
@@ -83,6 +84,7 @@ export default function PrescriptionVideos({
                       href={video.VDO_LINK_URL}
                       target="_blank"
                       rel="noopener noreferrer"
+                      title={video.VDO_TTL_NM}
                       className="animate-arrive flex gap-3 rounded-sharp border border-hairline p-3 transition-colors hover:border-brand hover:bg-mint"
                       style={{ animationDelay: `${delay}ms` }}
                     >
@@ -92,20 +94,18 @@ export default function PrescriptionVideos({
                         alt=""
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-1 truncate text-[0.9375rem] font-bold text-heading">
-                          {video.VDO_TTL_NM}
-                          <ExternalLink
-                            size={13}
-                            strokeWidth={2}
-                            className="flex-none text-placeholder"
-                            aria-hidden
-                          />
+                        {/* 채널·시리즈 접두어를 걷어낸 표시용 제목 (원문은 title 속성) */}
+                        <p className="line-clamp-2 text-[0.9375rem] font-bold leading-snug text-heading">
+                          {shortenVideoTitle(video.VDO_TTL_NM)}
                         </p>
-                        <p className="mt-0.5 line-clamp-2 text-[0.8125rem] leading-relaxed text-caption">
+                        <p className="mt-1 line-clamp-2 text-[0.8125rem] leading-relaxed text-caption">
                           {video.VDO_DESC}
                         </p>
-                        <p className="mt-1 text-[0.75rem] text-placeholder">
-                          {video.TRNG_NM} · {video.TRGT_AGRDE_NM}
+                        <p className="mt-1 flex items-center gap-1 text-[0.75rem] text-placeholder">
+                          {video.TRGT_AGRDE_NM}
+                          <span aria-hidden>·</span>
+                          유튜브에서 보기
+                          <ExternalLink size={11} strokeWidth={2} aria-hidden />
                         </p>
                       </div>
                     </a>
