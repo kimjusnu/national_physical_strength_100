@@ -110,7 +110,8 @@ export default function MeasureGuideModal({
       aria-labelledby="guide-title"
     >
       <div
-        className="w-full max-w-md rounded-t-sharp bg-white p-6 shadow-[0_17px_50px_rgba(0,0,0,0.19)] sm:rounded-sharp"
+        // 그림 + 단계 안내가 길어 작은 화면에서 넘칠 수 있다 — 패널 자체가 스크롤된다
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-t-sharp bg-white p-6 shadow-[0_17px_50px_rgba(0,0,0,0.19)] sm:rounded-sharp"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-start justify-between gap-4">

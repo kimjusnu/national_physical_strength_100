@@ -12,6 +12,13 @@ const DIR = "docs/report-images";
 
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
+  // 이미지가 실제로 그려진 뒤에 찍어야 빈 자리로 캡처되지 않는다
+  await page.waitForFunction(
+    () =>
+      Array.from(document.images).every((img) => img.complete && img.naturalWidth > 0),
+    undefined,
+    { timeout: 15000 },
+  );
   await page.waitForFunction(
     () =>
       Array.from(
