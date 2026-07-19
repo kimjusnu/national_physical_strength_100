@@ -18,7 +18,7 @@ export interface KspoVideoRecord {
   FT_ITEM_NM: string;
   /** 대상 */
   TRGT_AGRDE_NM: string;
-  /** 썸네일 URL (목업에서는 미제공) */
+  /** 썸네일 URL. 비우면 카테고리 아이콘으로 폴백 (VideoThumbnail) */
   IMG_FILE_URL: string;
   /** 재생 URL */
   VDO_LINK_URL: string;
