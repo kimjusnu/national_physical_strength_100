@@ -42,6 +42,8 @@ export interface FitnessAgeResult {
   overallAge: number;
   /** 실제나이 - 체력나이 (양수면 실제보다 젊음) */
   ageGap: number;
+  /** 클램핑 경계 도달 시 극단값 뱃지: 하한="상위 1% 체력", 상한="체력 개선 필요" */
+  boundary: "elite" | "needsImprovement" | null;
   items: ItemResult[];
   strengths: FitnessItemKey[];
   weaknesses: FitnessItemKey[];

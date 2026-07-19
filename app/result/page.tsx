@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { computeFitnessAge } from "@/lib/fitnessAge";
 import { parseResultQuery } from "@/lib/schemas";
+import { getPrescriptionVideos } from "@/lib/kspoApi";
+import { pickWeakItems } from "@/lib/videoMatch";
 import { ITEM_LABELS } from "@/data/normTables";
 import ResultHeroAge from "@/components/result/ResultHeroAge";
 import FitnessRadar from "@/components/result/FitnessRadar";
 import ItemBreakdown from "@/components/result/ItemBreakdown";
+import PrescriptionVideos from "@/components/result/PrescriptionVideos";
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -34,6 +37,11 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
   // 사용자 입력을 국민체력100 기준분포와 비교해 체력나이·백분위를 산출한다.
   const result = computeFitnessAge(user);
 
+  // [KSPO 국민체력100 데이터 활용 지점 #8]
+  // 백분위 하위 약점 항목에 맞는 운동처방 영상 추천 (동영상 API 15108846)
+  const weakItems = pickWeakItems(result.items);
+  const videos = await getPrescriptionVideos(weakItems);
+
   const summaryText =
     result.weaknesses.length > 0
       ? `${result.weaknesses.map((k) => ITEM_LABELS[k]).join(", ")} 항목이 또래 평균보다 아쉬워요. 이 부분을 보완하면 체력나이를 더 낮출 수 있어요.`
@@ -41,7 +49,11 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
 
   return (
     <div className="mx-auto w-full max-w-md space-y-6 px-4 py-8">
-      <ResultHeroAge realAge={user.age} overallAge={result.overallAge} />
+      <ResultHeroAge
+        realAge={user.age}
+        overallAge={result.overallAge}
+        boundary={result.boundary}
+      />
 
       <section className="rounded-3xl border border-neutral-200 dark:border-neutral-800 p-5">
         <h2 className="mb-2 text-lg font-bold">항목별 위치</h2>
@@ -65,6 +77,8 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
         </p>
       </section>
 
+      <PrescriptionVideos videos={videos} weakItems={weakItems} />
+
       <div className="flex flex-col gap-3">
         <Link
           href="/measure"
@@ -73,7 +87,7 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
           다시 측정하기
         </Link>
         <p className="text-center text-xs text-neutral-400">
-          맞춤 운동영상 추천과 가까운 체력인증센터 안내가 곧 추가됩니다.
+          가까운 체력인증센터 안내와 결과 카드 공유가 곧 추가됩니다.
         </p>
       </div>
     </div>

@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  FITNESS_AGE_MAX,
+  FITNESS_AGE_MIN,
   computeFitnessAge,
   itemFitnessAge,
   percentileFor,
 } from "@/lib/fitnessAge";
-import {
-  FITNESS_AGE_MAX,
-  FITNESS_AGE_MIN,
-  NORM_TABLES,
-} from "@/data/normTables";
+import { NORM_TABLES } from "@/data/normTables";
 import type { UserMeasurement } from "@/lib/types";
 
 const avg30sMale: UserMeasurement = {
@@ -53,11 +51,11 @@ describe("itemFitnessAge", () => {
     expect(age).toBeLessThan(54.5);
   });
 
-  it("최상위 성적은 하한(15세)으로 클램핑", () => {
+  it("최상위 성적은 하한(20세)으로 클램핑", () => {
     expect(itemFitnessAge(NORM_TABLES.M.grip, 80)).toBe(FITNESS_AGE_MIN);
   });
 
-  it("최하위 성적은 상한(80세)으로 클램핑", () => {
+  it("최하위 성적은 상한(70세)으로 클램핑", () => {
     expect(itemFitnessAge(NORM_TABLES.M.grip, 5)).toBe(FITNESS_AGE_MAX);
   });
 
@@ -115,6 +113,28 @@ describe("computeFitnessAge", () => {
     const input = structuredClone(avg30sMale);
     computeFitnessAge(input);
     expect(input).toEqual(avg30sMale);
+  });
+
+  it("전 항목 최상위 성적이면 boundary가 elite", () => {
+    const elite = computeFitnessAge({
+      ...avg30sMale,
+      items: { grip: 80, situp: 90, jump: 320, bodyfat: 5, shuttle: 120 },
+    });
+    expect(elite.overallAge).toBe(FITNESS_AGE_MIN);
+    expect(elite.boundary).toBe("elite");
+  });
+
+  it("전 항목 최하위 성적이면 boundary가 needsImprovement", () => {
+    const low = computeFitnessAge({
+      ...avg30sMale,
+      items: { grip: 6, situp: 0, jump: 31, bodyfat: 55, shuttle: 0 },
+    });
+    expect(low.overallAge).toBe(FITNESS_AGE_MAX);
+    expect(low.boundary).toBe("needsImprovement");
+  });
+
+  it("평균권 성적이면 boundary가 null", () => {
+    expect(computeFitnessAge(avg30sMale).boundary).toBeNull();
   });
 
   it("여성 데이터도 동일하게 동작한다", () => {

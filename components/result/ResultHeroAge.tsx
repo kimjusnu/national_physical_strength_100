@@ -1,12 +1,31 @@
 interface ResultHeroAgeProps {
   realAge: number;
   overallAge: number;
+  boundary: "elite" | "needsImprovement" | null;
 }
 
+const BOUNDARY_BADGES = {
+  elite: {
+    text: "🏆 상위 1% 체력",
+    className:
+      "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
+  },
+  needsImprovement: {
+    text: "체력 개선 필요",
+    className:
+      "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
+  },
+} as const;
+
 /** 체력나이 히어로 — 실제나이 대비 젊으면 초록, 많으면 주황으로 피드백 */
-export default function ResultHeroAge({ realAge, overallAge }: ResultHeroAgeProps) {
+export default function ResultHeroAge({
+  realAge,
+  overallAge,
+  boundary,
+}: ResultHeroAgeProps) {
   const displayAge = Math.round(overallAge);
   const gap = realAge - displayAge;
+  const boundaryBadge = boundary ? BOUNDARY_BADGES[boundary] : null;
 
   const gapBadge =
     gap > 0
@@ -40,11 +59,20 @@ export default function ResultHeroAge({ realAge, overallAge }: ResultHeroAgeProp
           세
         </span>
       </p>
-      <span
-        className={`inline-block rounded-full px-4 py-1.5 text-sm font-semibold ${gapBadge.className}`}
-      >
-        {gapBadge.text}
-      </span>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {boundaryBadge && (
+          <span
+            className={`inline-block rounded-full px-4 py-1.5 text-sm font-bold ${boundaryBadge.className}`}
+          >
+            {boundaryBadge.text}
+          </span>
+        )}
+        <span
+          className={`inline-block rounded-full px-4 py-1.5 text-sm font-semibold ${gapBadge.className}`}
+        >
+          {gapBadge.text}
+        </span>
+      </div>
       <p className="mt-3 text-xs text-neutral-400">실제 나이 {realAge}세 기준</p>
     </section>
   );

@@ -30,10 +30,6 @@ export interface ItemNorm {
   cells: NormCell[];
 }
 
-/** 체력나이 산출 결과의 클램핑 범위 */
-export const FITNESS_AGE_MIN = 15;
-export const FITNESS_AGE_MAX = 80;
-
 const AGE_BANDS: Array<[number, number, number]> = [
   [15, 19, 17],
   [20, 29, 24.5],

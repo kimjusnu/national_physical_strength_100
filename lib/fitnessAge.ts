@@ -1,6 +1,4 @@
 import {
-  FITNESS_AGE_MAX,
-  FITNESS_AGE_MIN,
   ITEM_WEIGHTS,
   NORM_TABLES,
   findCell,
@@ -21,6 +19,12 @@ import type {
  * ② "이 성적이 평균이 되는 연령"을 역산해 항목별 체력나이를 구한 뒤
  * ③ 가중평균으로 종합 체력나이를 산출한다.
  */
+
+/** 체력나이 클램핑 범위 — 극단값은 경계 뱃지(boundary)로 함께 표현한다 */
+export const FITNESS_AGE_MIN = 20;
+export const FITNESS_AGE_MAX = 70;
+/** 종합 체력나이가 경계에서 이 이내면 극단값 뱃지를 띄운다 */
+const BOUNDARY_MARGIN = 0.5;
 
 const STRENGTH_PERCENTILE = 60;
 const WEAKNESS_PERCENTILE = 40;
@@ -98,9 +102,17 @@ export function computeFitnessAge(user: UserMeasurement): FitnessAgeResult {
 
   const byPercentileDesc = [...items].sort((x, y) => y.percentile - x.percentile);
 
+  const boundary =
+    overallAge <= FITNESS_AGE_MIN + BOUNDARY_MARGIN
+      ? "elite"
+      : overallAge >= FITNESS_AGE_MAX - BOUNDARY_MARGIN
+        ? "needsImprovement"
+        : null;
+
   return {
     overallAge,
     ageGap: user.age - overallAge,
+    boundary,
     items,
     strengths: byPercentileDesc
       .filter((i) => i.percentile >= STRENGTH_PERCENTILE)
