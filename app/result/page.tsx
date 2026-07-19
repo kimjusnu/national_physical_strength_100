@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import { computeFitnessAge } from "@/lib/fitnessAge";
 import { parseResultQuery } from "@/lib/schemas";
@@ -15,6 +16,50 @@ import { ButtonLink } from "@/components/ui/Button";
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+/**
+ * 공유 링크 미리보기에 그 사람의 체력나이가 찍히도록 OG 이미지를 결과값으로
+ * 지정한다. 이미지는 /api/og가 요청 시점에 렌더한다.
+ */
+export async function generateMetadata({
+  searchParams,
+}: ResultPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const user = parseResultQuery(params);
+
+  if (!user) {
+    return { title: "측정 결과 — 체력나이" };
+  }
+
+  const { overallAge } = computeFitnessAge(user);
+  const fitnessAge = Math.round(overallAge);
+  const gap = user.age - fitnessAge;
+  const gapText =
+    gap > 0
+      ? `실제 나이보다 ${gap}세 젊어요`
+      : gap < 0
+        ? `실제 나이보다 ${-gap}세 많아요`
+        : "실제 나이와 같아요";
+
+  const title = `내 체력나이는 ${fitnessAge}세 — ${gapText}`;
+  const description =
+    "국민체력100 공공데이터와 비교한 체력나이입니다. 나도 3분 만에 측정해보세요.";
+
+  const query = new URLSearchParams(
+    Object.entries(params).flatMap(([k, v]) =>
+      typeof v === "string" ? [[k, v] as [string, string]] : [],
+    ),
+  ).toString();
+
+  const images = [{ url: `/api/og?${query}`, width: 1200, height: 630, alt: title }];
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, images },
+    twitter: { card: "summary_large_image", title, description, images },
+  };
 }
 
 export default async function ResultPage({ searchParams }: ResultPageProps) {
