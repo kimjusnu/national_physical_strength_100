@@ -3,10 +3,27 @@ import Link from "next/link";
 import "./globals.css";
 import BigTextToggle from "@/components/BigTextToggle";
 
+const SITE_NAME = "체력나이";
+const SITE_DESCRIPTION =
+  "KSPO 국민체력100 공공데이터 분포와 비교해 나의 체력나이를 측정하고, 약점에 맞는 운동과 가까운 체력인증센터를 안내받으세요.";
+
 export const metadata: Metadata = {
-  title: "체력나이 — 국민체력100 데이터로 알아보는 내 몸의 나이",
-  description:
-    "KSPO 국민체력100 공공데이터 분포와 비교해 나의 체력나이를 측정하고, 약점에 맞는 운동과 가까운 체력인증센터를 안내받으세요.",
+  metadataBase: new URL("https://national-physical-strength-100.vercel.app"),
+  title: `${SITE_NAME} — 국민체력100 데이터로 알아보는 내 몸의 나이`,
+  description: SITE_DESCRIPTION,
+  // app/opengraph-image.png 를 넣으면 Next.js가 자동으로 og:image에 연결한다
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — 내 체력은 또래 중에 어디쯤일까요?`,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — 내 체력은 또래 중에 어디쯤일까요?`,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 /** 저장된 큰 글씨 설정을 첫 페인트 전에 적용 (깜빡임 방지) */

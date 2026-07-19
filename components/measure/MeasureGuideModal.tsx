@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { X } from "lucide-react";
 import type { FitnessItemKey } from "@/lib/types";
 import { ITEM_LABELS } from "@/data/normTables";
@@ -10,6 +11,12 @@ interface GuideContent {
   steps: string[];
   tip: string;
 }
+
+/**
+ * 측정 자세 안내 그림. public/guides/<key>.webp 가 있으면 표시하고,
+ * 없으면 글 안내만 보여준다 (파일을 넣는 즉시 자동 반영).
+ */
+const GUIDE_IMAGE_DIR = "/guides";
 
 /** 국민체력100 표준 측정 절차를 요약한 자가측정 안내 */
 const GUIDES: Record<FitnessItemKey, GuideContent> = {
@@ -53,6 +60,25 @@ const GUIDES: Record<FitnessItemKey, GuideContent> = {
     tip: "공간이 없다면 생략하고 체력인증센터에서 정식 측정을 받으세요.",
   },
 };
+
+/** 그림이 없으면 아무것도 렌더하지 않는다 — 글 안내만으로도 완결되게 */
+function GuideImage({ itemKey }: { itemKey: FitnessItemKey }) {
+  const [missing, setMissing] = useState(false);
+  if (missing) return null;
+
+  return (
+    <div className="relative mb-5 aspect-4/3 w-full overflow-hidden rounded-sharp bg-surface-alt">
+      <Image
+        src={`${GUIDE_IMAGE_DIR}/${itemKey}.webp`}
+        alt={`${ITEM_LABELS[itemKey]} 측정 자세`}
+        fill
+        sizes="(max-width: 448px) 100vw, 448px"
+        className="object-contain"
+        onError={() => setMissing(true)}
+      />
+    </div>
+  );
+}
 
 interface MeasureGuideModalProps {
   itemKey: FitnessItemKey | null;
@@ -100,6 +126,8 @@ export default function MeasureGuideModal({
             <X size={20} strokeWidth={2} aria-hidden />
           </button>
         </div>
+
+        <GuideImage itemKey={itemKey} />
 
         <ol className="mb-4 space-y-3">
           {guide.steps.map((step, i) => (
