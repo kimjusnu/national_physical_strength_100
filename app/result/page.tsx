@@ -8,6 +8,8 @@ import ResultHeroAge from "@/components/result/ResultHeroAge";
 import FitnessRadar from "@/components/result/FitnessRadar";
 import ItemBreakdown from "@/components/result/ItemBreakdown";
 import PrescriptionVideos from "@/components/result/PrescriptionVideos";
+import NearbyCenters from "@/components/result/NearbyCenters";
+import ShareCard from "@/components/result/ShareCard";
 
 interface ResultPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -79,17 +81,16 @@ export default async function ResultPage({ searchParams }: ResultPageProps) {
 
       <PrescriptionVideos videos={videos} weakItems={weakItems} />
 
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/measure"
-          className="rounded-xl border border-emerald-600 py-4 text-center font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
-        >
-          다시 측정하기
-        </Link>
-        <p className="text-center text-xs text-neutral-400">
-          가까운 체력인증센터 안내와 결과 카드 공유가 곧 추가됩니다.
-        </p>
-      </div>
+      <NearbyCenters />
+
+      <ShareCard result={result} realAge={user.age} />
+
+      <Link
+        href="/measure"
+        className="block rounded-xl border border-emerald-600 py-4 text-center font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors"
+      >
+        다시 측정하기
+      </Link>
     </div>
   );
 }
