@@ -1,6 +1,10 @@
 # 체력나이 (Fitness Age)
 
+**서비스 URL: https://fitness-age-eight.vercel.app**
+
 국민체육진흥공단(KSPO) **국민체력100 공공데이터**를 활용해, 사용자의 체력 측정값으로부터 **"체력나이"** 를 산출하는 반응형 웹 서비스입니다.
+
+> 결과 예시(바로 확인): [35세 남성 사례](https://fitness-age-eight.vercel.app/result?g=M&age=35&h=174&w=72&grip=30&situp=15&jump=207&bodyfat=19.5&shuttle=33)
 
 - 악력·윗몸말아올리기·제자리멀리뛰기·체지방률(+선택: 왕복오래달리기)을 입력하면
 - 같은 성별·연령대의 국민체력100 측정자 분포와 비교해 **항목별 백분위**와
