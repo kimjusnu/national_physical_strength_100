@@ -82,8 +82,10 @@ describe("computeFitnessAge", () => {
   });
 
   it("shuttle 미입력 시에도 나머지 4개 항목으로 산출된다", () => {
-    const { shuttle: _omit, ...rest } = avg30sMale.items;
-    const r = computeFitnessAge({ ...avg30sMale, items: rest });
+    const r = computeFitnessAge({
+      ...avg30sMale,
+      items: { grip: 42, situp: 36, jump: 207, bodyfat: 19.5 },
+    });
     expect(r.items).toHaveLength(4);
     expect(r.overallAge).toBeGreaterThan(31);
     expect(r.overallAge).toBeLessThan(38);

@@ -16,7 +16,7 @@ import { MOCK_MEASUREMENTS, type KspoMeasurementRecord } from "@/data/mockMeasur
 const KSPO_MEASUREMENT_API =
   "https://apis.data.go.kr/B551014/SRVC_OD_API_FACIL_MESURE_RESULT/TODZ_API_MESURE_RESULT";
 
-function useMock(): boolean {
+function isMockEnabled(): boolean {
   return process.env.USE_MOCK !== "false";
 }
 
@@ -32,7 +32,7 @@ export async function fetchMeasurements(params: {
   page?: number;
   perPage?: number;
 }): Promise<KspoMeasurementRecord[]> {
-  if (useMock()) {
+  if (isMockEnabled()) {
     return MOCK_MEASUREMENTS;
   }
 
